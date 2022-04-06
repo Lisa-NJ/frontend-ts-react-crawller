@@ -1,4 +1,4 @@
-import axios from 'axios';
+import request from '../../request';
 import qs from 'qs'
 import { useState } from 'react'
 import { Redirect } from 'react-router';
@@ -12,17 +12,17 @@ const LoginForm = () => {
     const onFinish = (values: any) => {
         console.log('axios-post', values.password);
 
-        axios.post('/api/login', qs.stringify({
+        request.post('/api/login', qs.stringify({
             password: values.password
         }), {
             headers: {
                 "Content-Type": "application/x-www-form-urlencoded"
             }
         }).then(res => {
-            setIsLogin(res.data?.data)
-            console.log('res=', res.data?.data);
-
-            if (!isLogin) {
+            const data: boolean = res.data
+            if (data) {
+                setIsLogin(true)
+            } else {
                 message.error('fail to log in')
             }
         })

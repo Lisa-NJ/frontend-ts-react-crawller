@@ -1,7 +1,7 @@
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState } from 'react'
 import { Redirect } from 'react-router'
 import { Button, message } from 'antd'
-import axios from 'axios'
+import request from '../../request'
 import ReactECharts from 'echarts-for-react'
 import echarts from 'echarts'
 import moment from 'moment'
@@ -11,12 +11,6 @@ import './style.css'
 interface CourseItem {
     title: string
     count: number
-}
-
-interface LineData {
-    name: string,
-    type: string,
-    data: number[]
 }
 
 interface Data {
@@ -30,18 +24,18 @@ const Home = () => {
 
     //第一次渲染前，发送 ajax 请求
     useEffect(() => {
-        axios.get('/api/isLogin').then(res => {
+        request.get('/api/isLogin').then(res => {
             console.log(res)
-
-            if (!res.data?.data) {
+            const data: boolean = res.data
+            if (!data) {
                 setIsLogin(false)
             }
             setLoded(true)
         })
-        axios.get('/api/showData').then(res => {
-            if (res.data?.data) {
-                console.log(res.data.data);
-                setData(res.data.data)
+        request.get('/api/showData').then(res => {
+            const data: Data = res.data
+            if (data) {
+                setData(data)
             }
         })
 
@@ -50,25 +44,21 @@ const Home = () => {
     console.log(isLogin, loaded);
 
     const handleLogoutClick = () => {
-        axios.get('/api/logout').then(res => {
+        request.get('/api/logout').then(res => {
             console.log("res=", res);
-
-            if (res.data?.data) {
+            const data: boolean = res.data
+            if (data) {
                 setIsLogin(false)
             }
         })
     }
     const handleGetClick = () => {
-        axios.get('/api/getData').then(res => {
+        request.get('/api/getData').then(res => {
             console.log("res=", res);
-            if (res.data?.data) {
+            const data: boolean = res.data
+            if (data) {
                 message.success("getData seccess!")
             }
-        })
-    }
-    const handleShowClick = () => {
-        axios.get('/api/showData').then(res => {
-            console.log("res=", res);
         })
     }
 
@@ -91,7 +81,7 @@ const Home = () => {
                 tempData[title] ? tempData[title].push(count) : tempData[title] = [count]
             })
         }
-        const result: LineData[] = []
+        const result: echarts.EChartOption.Series[] = []
         for (let i in tempData) {
             result.push({
                 name: i,
