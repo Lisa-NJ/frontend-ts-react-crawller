@@ -2,6 +2,7 @@
   "name": "react-project",
   "version": "0.1.0",
   "private": true,
+  "proxy": "http://localhost:7001",
   "dependencies": {
     "@testing-library/jest-dom": "^5.16.3",
     "@testing-library/react": "^12.1.4",
@@ -39,5 +40,14 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "@types/qs": "^6.9.7",
+    "@types/react-router-dom": "5.1.7",
+    "antd": "^4.19.3",
+    "axios": "^0.26.1",
+    "qs": "^6.10.3",
+    "react-router": "^5.2.0",
+    "react-router-dom": "^5.2.0"
   }
 }
