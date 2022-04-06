@@ -1,14 +1,32 @@
 import { useEffect, useState, useRef } from 'react'
 import { Redirect } from 'react-router'
-import './style.css'
 import { Button, message } from 'antd'
 import axios from 'axios'
 import ReactECharts from 'echarts-for-react'
 import echarts from 'echarts'
+import moment from 'moment'
+import './style.css'
+
+
+interface CourseItem {
+    title: string
+    count: number
+}
+
+interface LineData {
+    name: string,
+    type: string,
+    data: number[]
+}
+
+interface Data {
+    [key: string]: CourseItem[]
+}
 
 const Home = () => {
     const [isLogin, setIsLogin] = useState(true)
     const [loaded, setLoded] = useState(false)
+    const [data, setData] = useState<Data>({})
 
     //第一次渲染前，发送 ajax 请求
     useEffect(() => {
@@ -19,6 +37,12 @@ const Home = () => {
                 setIsLogin(false)
             }
             setLoded(true)
+        })
+        axios.get('/api/showData').then(res => {
+            if (res.data?.data) {
+                console.log(res.data.data);
+                setData(res.data.data)
+            }
         })
 
     }, [])
@@ -45,20 +69,46 @@ const Home = () => {
     const handleShowClick = () => {
         axios.get('/api/showData').then(res => {
             console.log("res=", res);
-
         })
     }
 
     const getOption = (): echarts.EChartOption => {
+        console.log(data);
+
+        const courseNames: string[] = []
+        const times: string[] = []
+        const tempData: {
+            [key: string]: number[]
+        } = {}
+        for (let i in data) {
+            const item = data[i]
+            times.push(moment(Number(i)).format('MM-DD HH:mm'))
+            item.forEach(innerItem => {
+                const { title, count } = innerItem
+                if (courseNames.indexOf(title) === -1) {
+                    courseNames.push(title)
+                }
+                tempData[title] ? tempData[title].push(count) : tempData[title] = [count]
+            })
+        }
+        const result: LineData[] = []
+        for (let i in tempData) {
+            result.push({
+                name: i,
+                type: 'line',
+                data: tempData[i]
+            })
+        }
+
         return {
             title: {
-                text: 'Stacked Line'
+                text: 'Num of students '
             },
             tooltip: {
                 trigger: 'axis'
             },
             legend: {
-                data: ['Email', 'Union Ads', 'Video Ads', 'Direct', 'Search Engine']
+                data: courseNames
             },
             grid: {
                 left: '3%',
@@ -66,51 +116,15 @@ const Home = () => {
                 bottom: '3%',
                 containLabel: true
             },
-            toolbox: {
-                feature: {
-                    saveAsImage: {}
-                }
-            },
             xAxis: {
                 type: 'category',
                 boundaryGap: false,
-                data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+                data: times
             },
             yAxis: {
                 type: 'value'
             },
-            series: [
-                {
-                    name: 'Email',
-                    type: 'line',
-                    stack: 'Total',
-                    data: [120, 132, 101, 134, 90, 230, 210]
-                },
-                {
-                    name: 'Union Ads',
-                    type: 'line',
-                    stack: 'Total',
-                    data: [220, 182, 191, 234, 290, 330, 310]
-                },
-                {
-                    name: 'Video Ads',
-                    type: 'line',
-                    stack: 'Total',
-                    data: [150, 232, 201, 154, 190, 330, 410]
-                },
-                {
-                    name: 'Direct',
-                    type: 'line',
-                    stack: 'Total',
-                    data: [320, 332, 301, 334, 390, 330, 320]
-                },
-                {
-                    name: 'Search Engine',
-                    type: 'line',
-                    stack: 'Total',
-                    data: [820, 932, 901, 934, 1290, 1330, 1320]
-                }
-            ]
+            series: result
         };
 
 
