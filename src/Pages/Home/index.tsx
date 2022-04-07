@@ -7,33 +7,23 @@ import echarts from 'echarts'
 import moment from 'moment'
 import './style.css'
 
-
-interface CourseItem {
-    title: string
-    count: number
-}
-
-interface Data {
-    [key: string]: CourseItem[]
-}
-
 const Home = () => {
     const [isLogin, setIsLogin] = useState(true)
     const [loaded, setLoded] = useState(false)
-    const [data, setData] = useState<Data>({})
+    const [data, setData] = useState<responseResult.Data>({})
 
     //第一次渲染前，发送 ajax 请求
     useEffect(() => {
         request.get('/api/isLogin').then(res => {
             console.log(res)
-            const data: boolean = res.data
+            const data: responseResult.isLogin = res.data
             if (!data) {
                 setIsLogin(false)
             }
             setLoded(true)
         })
         request.get('/api/showData').then(res => {
-            const data: Data = res.data
+            const data: responseResult.Data = res.data
             if (data) {
                 setData(data)
             }
@@ -46,7 +36,7 @@ const Home = () => {
     const handleLogoutClick = () => {
         request.get('/api/logout').then(res => {
             console.log("res=", res);
-            const data: boolean = res.data
+            const data: responseResult.logout = res.data
             if (data) {
                 setIsLogin(false)
             }
@@ -55,7 +45,7 @@ const Home = () => {
     const handleGetClick = () => {
         request.get('/api/getData').then(res => {
             console.log("res=", res);
-            const data: boolean = res.data
+            const data: responseResult.getData = res.data
             if (data) {
                 message.success("getData seccess!")
             }
